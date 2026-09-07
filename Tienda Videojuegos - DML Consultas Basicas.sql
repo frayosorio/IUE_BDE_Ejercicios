@@ -35,3 +35,20 @@ INSERT INTO TipoDocumento
 UPDATE Cliente
 	SET IdTipoDocumento = 22
 	WHERE Id = 86
+
+-- Listar los datos foraneos (usando ALIAS en las tablas)
+SELECT C.Id IdCliente, C.Nombre, C.Identificacion, C.IdTipoDocumento, T.Nombre TipoDocumento
+	FROM Cliente C
+		JOIN TipoDocumento T ON T.Id = C.IdTipoDocumento
+	WHERE T.Sigla= 'CE'
+
+
+-- Listar las ventas realizadas a un cliente
+SELECT C.Nombre Cliente, T.Sigla + ' ' + C.Identificacion Identificacion,
+	C.Direccion + ' ' + CD.Nombre Direccion
+	FROM Cliente C
+		JOIN TipoDocumento T
+			ON C.IdTipoDocumento = T.Id
+		JOIN Ciudad CD
+			ON C.IdCiudad = CD.Id
+	
