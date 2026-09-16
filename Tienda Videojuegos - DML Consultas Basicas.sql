@@ -77,6 +77,13 @@ INSERT INTO VentaDetalle
 	VALUES
 	((SELECT Id FROM Venta WHERE NumeroFactura=142), 16, 2, 20000)
 
+-- Agregar otro Titulo vendido en cantidad 5 a la factura 100
+INSERT INTO VentaDetalle
+	(IdVenta, IdTitulo, Cantidad, Precio)
+	VALUES
+	((SELECT Id FROM Venta WHERE NumeroFactura=100), 10, 5, 33000)
+
+
 SELECT *
 	FROM Titulo
 	WHERE Nombre='Left 4 Dead 2'
@@ -159,4 +166,31 @@ SELECT C.Nombre Cliente, TD.Sigla + ' ' + C.Identificacion Identificacion,
 						)
 	
 
-	
+	-- Listar Cantidad de Empresas Desarrolladores por Pais
+	SELECT P.Nombre Pais, D.Nombre Desarrollador
+		FROM Pais P
+			JOIN Desarrollador D ON P.Id = D.IdPais
+		ORDER BY 1, 2
+
+	SELECT P.Nombre Pais, COUNT(*) TotalDesarrolladores
+		FROM Pais P
+			JOIN Desarrollador D ON P.Id = D.IdPais
+		GROUP BY P.Nombre
+
+	-- Listar ventas donde se hayan comprado más de 1 unidad
+	SELECT V.NumeroFactura, V.Fecha,
+		C.Nombre Cliente, TD.Sigla + ' ' + C.Identificacion Identificacion,
+		SUM(VD.Cantidad) TotalUnidades
+		FROM VentaDetalle VD
+			JOIN Venta V ON V.Id = VD.IdVenta
+			JOIN Cliente C ON V.IdCliente = C.Id
+			JOIN TipoDocumento TD ON C.IdTipoDocumento = TD.Id
+		GROUP BY V.NumeroFactura, V.Fecha, C.Nombre, TD.Sigla, C.Identificacion
+		HAVING SUM(VD.Cantidad) > 1
+
+	-- Listar el promedio de unidades realizadas en cada compra
+	SELECT AVG(T.TotalUnidades)
+		FROM (
+			SELECT VD.IdVenta, SUM(VD.Cantidad) TotalUnidades
+				FROM VentaDetalle VD
+				GROUP BY VD.IdVenta) AS T
