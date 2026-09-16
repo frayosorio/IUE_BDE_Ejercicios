@@ -43,12 +43,120 @@ SELECT C.Id IdCliente, C.Nombre, C.Identificacion, C.IdTipoDocumento, T.Nombre T
 	WHERE T.Sigla= 'CE'
 
 
--- Listar las ventas realizadas a un cliente
-SELECT C.Nombre Cliente, T.Sigla + ' ' + C.Identificacion Identificacion,
-	C.Direccion + ' ' + CD.Nombre Direccion
+-- Listar las ventas realizadas a un cliente incluyendo el detalle y el valor total
+SELECT C.Nombre Cliente, TD.Sigla + ' ' + C.Identificacion Identificacion,
+	C.Direccion + ' ' + CD.Nombre Direccion,
+	V.NumeroFactura, V.Fecha,
+	EV.Nombre Estado,
+	E.Nombre + ' ' + TE.Sigla + E.Identificacion Empleado,
+	T.Nombre, VD.Cantidad, VD.Precio, VD.Descuento,
+	VD.Cantidad * VD.Precio - VD.Descuento ValorTotal
 	FROM Cliente C
-		JOIN TipoDocumento T
-			ON C.IdTipoDocumento = T.Id
+		JOIN TipoDocumento TD
+			ON C.IdTipoDocumento = TD.Id
 		JOIN Ciudad CD
 			ON C.IdCiudad = CD.Id
+		JOIN Venta V
+			ON V.IdCliente = C.Id
+		JOIN EstadoVenta EV
+			ON V.IdEstado = EV.Id
+		JOIN Empleado E
+			ON V.IdEmpleado = E.Id
+		JOIN TipoDocumento TE
+			ON E.IdTipoDocumento = TE.Id
+		JOIN VentaDetalle VD
+			ON VD.IdVenta = V.Id
+		JOIN Titulo T
+			ON VD.IdTitulo = T.Id
+	WHERE C.Identificacion='5500100'
+	ORDER BY NumeroFactura, T.Nombre
+
+-- Agregar otro Titulo vendido en cantidad 2 a la factura 142
+INSERT INTO VentaDetalle
+	(IdVenta, IdTitulo, Cantidad, Precio)
+	VALUES
+	((SELECT Id FROM Venta WHERE NumeroFactura=142), 16, 2, 20000)
+
+SELECT *
+	FROM Titulo
+	WHERE Nombre='Left 4 Dead 2'
+
+-- Cambiar la cantidad a 3 del producto vendido en la factura 160
+UPDATE VentaDetalle
+	SET Cantidad = 3
+	WHERE IdVenta = (SELECT Id FROM Venta WHERE NumeroFactura=160)
+		AND IdTitulo = 39
+
+-- Consultar cuantas unidades ha comprado un cliente
+SELECT SUM(VD.Cantidad) TotalUnidades
+	FROM VentaDetalle VD
+		JOIN Venta V ON VD.IdVenta = V.Id
+		JOIN Cliente C ON V.IdCliente = C.Id
+	WHERE C.Identificacion='5500100'
+
+
+-- Consultar cual es el valor total que ha comprado un cliente
+SELECT SUM(VD.Cantidad * VD.Precio - VD.Descuento) ValorTotal
+	FROM VentaDetalle VD
+		JOIN Venta V ON VD.IdVenta = V.Id
+		JOIN Cliente C ON V.IdCliente = C.Id
+	WHERE C.Identificacion='5500100'
+
+-- Listar Estados
+SELECT * FROM EstadoVenta
+
+-- Consultar cuantas unidades y el valor total de comprar de cada uno de los clientes
+SELECT C.Nombre Cliente, TD.Sigla + ' ' + C.Identificacion Identificacion,
+	SUM(VD.Cantidad) TotalUnidades,
+	SUM(VD.Cantidad * VD.Precio - VD.Descuento) ValorTotal
+	FROM Cliente C
+		JOIN TipoDocumento TD
+			ON C.IdTipoDocumento = TD.Id
+		JOIN Venta V
+			ON V.IdCliente = C.Id
+		JOIN VentaDetalle VD
+			ON VD.IdVenta = V.Id
+	WHERE V.IdEstado NOT IN (1, 6)
+	GROUP BY C.Nombre, TD.Sigla, C.Identificacion
+	ORDER BY ValorTotal DESC
+
+-- Obtener el cliente que más ha comprado (en valor de compra)
+SELECT TOP 1
+	C.Nombre Cliente, TD.Sigla + ' ' + C.Identificacion Identificacion,
+	SUM(VD.Cantidad) TotalUnidades,
+	SUM(VD.Cantidad * VD.Precio - VD.Descuento) ValorTotal
+	FROM Cliente C
+		JOIN TipoDocumento TD
+			ON C.IdTipoDocumento = TD.Id
+		JOIN Venta V
+			ON V.IdCliente = C.Id
+		JOIN VentaDetalle VD
+			ON VD.IdVenta = V.Id
+	WHERE V.IdEstado NOT IN (1, 6)
+	GROUP BY C.Nombre, TD.Sigla, C.Identificacion
+	ORDER BY ValorTotal DESC
+
+SELECT C.Nombre Cliente, TD.Sigla + ' ' + C.Identificacion Identificacion,
+	SUM(VD.Cantidad) TotalUnidades,
+	SUM(VD.Cantidad * VD.Precio - VD.Descuento) ValorTotal
+	FROM Cliente C
+		JOIN TipoDocumento TD
+			ON C.IdTipoDocumento = TD.Id
+		JOIN Venta V
+			ON V.IdCliente = C.Id
+		JOIN VentaDetalle VD
+			ON VD.IdVenta = V.Id
+	WHERE V.IdEstado NOT IN (1, 6)
+	GROUP BY C.Nombre, TD.Sigla, C.Identificacion
+	HAVING SUM(VD.Cantidad * VD.Precio - VD.Descuento) = (SELECT TOP 1
+							SUM(VD.Cantidad * VD.Precio - VD.Descuento) ValorTotal
+							FROM Venta V
+								JOIN VentaDetalle VD
+									ON VD.IdVenta = V.Id
+							WHERE V.IdEstado NOT IN (1, 6)
+							GROUP BY V.IdCliente
+							ORDER BY ValorTotal DESC
+						)
+	
+
 	
