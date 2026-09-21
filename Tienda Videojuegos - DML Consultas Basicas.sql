@@ -68,7 +68,7 @@ SELECT C.Nombre Cliente, TD.Sigla + ' ' + C.Identificacion Identificacion,
 			ON VD.IdVenta = V.Id
 		JOIN Titulo T
 			ON VD.IdTitulo = T.Id
-	WHERE C.Identificacion='5500100'
+	WHERE C.Identificacion='8743504'
 	ORDER BY NumeroFactura, T.Nombre
 
 -- Agregar otro Titulo vendido en cantidad 2 a la factura 142
@@ -92,6 +92,12 @@ SELECT *
 UPDATE VentaDetalle
 	SET Cantidad = 3
 	WHERE IdVenta = (SELECT Id FROM Venta WHERE NumeroFactura=160)
+		AND IdTitulo = 39
+
+-- Cambiar la cantidad a 2 del producto vendido en la factura 34
+UPDATE VentaDetalle
+	SET Cantidad = 2
+	WHERE IdVenta = (SELECT Id FROM Venta WHERE NumeroFactura=34)
 		AND IdTitulo = 39
 
 -- Consultar cuantas unidades ha comprado un cliente
