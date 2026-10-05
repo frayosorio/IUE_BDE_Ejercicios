@@ -56,7 +56,25 @@ WITH PaisesxGrupo AS (
             WHEN E.IdPais2=PG.IdPais AND E.Goles2>E.Goles1 
                 THEN 1
             ELSE 0
-            END) PG
+            END) PG,
+            SUM(CASE WHEN E.Goles1 = E.Goles2
+                THEN 1
+                ELSE 0
+            END) PE,
+            SUM(CASE WHEN E.IdPais1=PG.IdPais AND E.Goles1<E.Goles2 
+                THEN 1
+            WHEN E.IdPais2=PG.IdPais AND E.Goles2<E.Goles1 
+                THEN 1
+            ELSE 0
+            END) PP,
+            SUM(CASE WHEN E.IdPais1=PG.IdPais
+                THEN E.Goles1
+                ELSE E.Goles2
+            END) GF,
+            SUM(CASE WHEN E.IdPais1=PG.IdPais
+                THEN E.Goles2
+                ELSE E.Goles1
+            END) GC
          FROM Encuentro E
             JOIN pais P1 ON E.idpais1=P1.id
             JOIN pais P2 ON E.idpais2=P2.id
@@ -64,7 +82,12 @@ WITH PaisesxGrupo AS (
         WHERE IdCampeonato=1
             AND IdFase=1
         GROUP BY PG.IdPais
-    )
-    SELECT P.Pais, RP.PJ, RP.PG
+    ),
+    Posiciones AS (
+    SELECT P.Pais, RP.PJ, RP.PG, RP.PE, RP.PP, RP.GF, RP.GC, 
+        RP.GF-RP.GC Diferencia, RP.PG*3+RP.PE Puntos,
+        ROW_NUMBER() OVER (ORDER BY RP.PG*3+RP.PE DESC, RP.GF-RP.GC DESC) Posicion
         FROM ResultadosXPais RP
             JOIN Pais P ON RP.IdPais = P.Id
+    )
+    SELECT * FROM Posiciones
