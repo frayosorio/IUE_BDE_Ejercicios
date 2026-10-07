@@ -16,10 +16,10 @@ GO
 -- Prueba de la vista
 SELECT *
 	FROM vEncuentros
-	WHERE Fase LIKE '%Diecise%'
+	WHERE Fase LIKE '%Fina%'
 
 -- Vista de ESTADIOS
-CREATE VIEW vEstadios AS
+CREATE OR ALTER VIEW vEstadios AS
 	SELECT ES.Id, ES.Estadio, CD.Ciudad,
 		PE.Pais, ES.Capacidad
 		FROM Estadio ES
@@ -35,3 +35,26 @@ SELECT *
 SELECT *
 	FROM vEstadios
 	WHERE ciudad LIKE '%Dallas%'
+
+SELECT *
+	FROM vEstadios
+	WHERE pais LIKE '%Esta%'
+
+
+-- Vista de Campeonatos, Grupos y Paises
+CREATE OR ALTER VIEW vCampeonatos AS
+	SELECT C.Id IdCampeonato, C.Campeonato, STRING_AGG(P.Pais, ', ') Organizadores, 
+		G.Id IdGrupo, G.Grupo,
+		GP.IdPais, PG.Pais
+		FROM Campeonato C
+			JOIN CampeonatoPais CP ON C.Id = CP.IdCampeonato
+			JOIN Pais P ON P.Id = CP.IdPais
+			JOIN Grupo G ON C.Id = G.IdCampeonato
+			JOIN GrupoPais GP ON GP.IdGrupo = G.Id
+			JOIN Pais PG ON PG.Id = GP.IdPais
+		GROUP BY C.Id, C.Campeonato, G.Grupo, PG.Pais, G.Id, GP.IdPais
+GO
+
+SELECT *
+	FROM vCampeonatos
+	ORDER BY Pais

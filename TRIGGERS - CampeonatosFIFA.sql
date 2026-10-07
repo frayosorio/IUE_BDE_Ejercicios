@@ -23,4 +23,18 @@ END
 GO
 
 --Evitar que un equipo juegue contra sí mismo
-
+CREATE TRIGGER tEncuentro_ValidarSeleccionesDiferentes
+ON Encuentro
+AFTER INSERT, UPDATE
+AS
+BEGIN
+	IF EXISTS(SELECT *
+				FROM Inserted
+				WHERE IdPais1 = IdPais2
+	)
+	BEGIN
+		ROLLBACK TRANSACTION
+		RETURN
+	END
+END
+GO
