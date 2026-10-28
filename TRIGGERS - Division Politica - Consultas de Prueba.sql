@@ -51,6 +51,16 @@ UPDATE Ciudad
 	SET CapitalRegion = 1
 	WHERE Nombre = 'MEDELLIN'
 
+-- Hacer 'MEDELLIN' la capital del Pais 'COLOMBIA'
+UPDATE Ciudad
+	SET CapitalPais = 1
+	WHERE Nombre = 'MEDELLIN'
+
+-- Hacer 'BOGOTÁ' la capital del Pais 'COLOMBIA'
+UPDATE Ciudad
+	SET CapitalPais = 1
+	WHERE Nombre LIKE '%BOGOTA%'
+
 
 SELECT *
 --DELETE 

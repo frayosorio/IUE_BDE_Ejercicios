@@ -40,3 +40,27 @@ AS BEGIN
 			JOIN UltimaCapital U ON C.IdRegion = U.IdRegion
 END
 GO
+
+-- Trigger para dejar solo una capital de país
+CREATE OR ALTER TRIGGER tCiudad_ValidarUnaSolaCapitalPais
+ON Ciudad
+FOR INSERT, UPDATE
+AS BEGIN
+	IF TRIGGER_NESTLEVEL() > 1
+        RETURN;
+	WITH UltimaCapital AS (
+		SELECT TOP 1 I.Id, R.IdPais
+			FROM Inserted I
+				JOIN Region R ON I.IdRegion = R.Id
+			WHERE I.CapitalPais = 1
+	)
+	UPDATE C
+		SET C.CapitalPais = CASE WHEN C.Id = U.Id
+								THEN 1
+								ELSE 0
+								END
+		FROM Ciudad C
+			JOIN Region R ON C.IdRegion = R.Id
+			JOIN UltimaCapital U ON R.IdPais = U.IdPais
+END
+GO
