@@ -45,9 +45,10 @@ SELECT DISTINCT P1.pais, E.goles1, E.goles2, P2.pais, E.fecha,
 
 -- Obtener la tabla de posiciones del grupo H del Campeonato FIFA RUSIA 2018
 WITH PaisesxGrupo AS (
-        SELECT IdPais
-            FROM grupopais
-            WHERE IdGrupo=8
+        SELECT GP.IdPais, G.IdCampeonato
+            FROM GrupoPais GP
+                JOIN Grupo G ON GP.IdGrupo = G.Id
+            WHERE GP.IdGrupo=2
     ),
     ResultadosXPais AS (
     SELECT PG.IdPais, COUNT(*) PJ,
@@ -76,11 +77,9 @@ WITH PaisesxGrupo AS (
                 ELSE E.Goles1
             END) GC
          FROM Encuentro E
-            JOIN pais P1 ON E.idpais1=P1.id
-            JOIN pais P2 ON E.idpais2=P2.id
             JOIN PaisesxGrupo PG ON (PG.IdPais = E.IdPais1 OR PG.IdPais = E.IdPais2)
-        WHERE IdCampeonato=1
-            AND IdFase=1
+                                AND E.IdCampeonato = PG.IdCampeonato
+        WHERE IdFase=1
         GROUP BY PG.IdPais
     ),
     Posiciones AS (

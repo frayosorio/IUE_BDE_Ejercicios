@@ -9,7 +9,7 @@ SELECT C.Id IdCampeonato, C.Campeonato, STRING_AGG(P.Pais, ', ') Organizadores,
 		JOIN GrupoPais GP ON GP.IdGrupo = G.Id
 		JOIN Pais PG ON PG.Id = GP.IdPais
 	GROUP BY C.Id, C.Campeonato, G.Grupo, PG.Pais, G.Id
-	ORDER BY 1, 3, 4
+	ORDER BY 2, 5, 6
 
 --Consulta con información completa de cada encuentro
 SELECT C.Campeonato, F.Fase, E.Fecha, 
