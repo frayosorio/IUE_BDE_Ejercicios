@@ -8,10 +8,10 @@ import org.springframework.stereotype.Service;
 import traduccion.api.dominio.Frase;
 import traduccion.api.repositorios.FraseRepositorio;
 
-@Service 
+@Service
 public class FraseServicio {
 
-    @Autowired 
+    @Autowired
     private FraseRepositorio fraseRepositorio;
 
     public List<Frase> listar() {
